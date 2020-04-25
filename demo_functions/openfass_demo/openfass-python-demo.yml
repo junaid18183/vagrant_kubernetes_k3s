@@ -1,0 +1,11 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://172.28.128.4:31112
+functions:
+  openfass-python-demo:
+    lang: python
+    handler: ./openfass-python-demo
+    image: junaid18183/openfass-python-demo:latest
+    imagePullPolicy: IfNotPresent
+

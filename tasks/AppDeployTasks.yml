@@ -1,0 +1,47 @@
+version: '2'
+silent: true
+env:
+  KUBECONFIG: kubeconfig.yml
+
+tasks:
+  all:
+    desc: Deploy the app
+    deps: [kubeless,fission,openfaas,knative]
+    preconditions:
+      - vagrant up
+
+  kubeless:
+    desc: Deploy the kubeless on this vagrant box
+    preconditions:
+      - vagrant up
+    cmds:
+      - kubectl apply -f config/kubeless-v1.0.6.yaml
+      - kubectl get pods -n kubeless
+
+  fission:
+    desc: Deploy the kubeless on this vagrant box
+    preconditions:
+      - vagrant up
+    cmds:
+      - kubectl apply -f config/fission-core-1.8.0.yaml
+      - kubectl get pods -n fission
+
+  openfaas:
+    desc: Deploy the openfaas on this vagrant box
+    preconditions:
+      - vagrant up
+    cmds:
+      - kubectl apply -f config/openfaas-5.4.1-install.yaml
+      - kubectl get pods -n openfaas
+
+  knative:
+    desc: Deploy the knative on this vagrant box
+    preconditions:
+      - vagrant up
+    cmds:
+      - kubectl apply -f config/knative/serving-crds.yaml
+      - kubectl apply -f config/knative/serving-core.yaml
+      - kubectl apply -f config/knative/kourier.yaml
+      - kubectl patch configmap/config-network -n knative-serving --type merge -p '{"data":{"ingress.class":"kourier.ingress.networking.knative.dev"}}'
+      - kubectl get pods -n knative-serving
+      - kubectl get pods -n kourier-system

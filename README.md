@@ -1,110 +1,161 @@
-# Offline docker images and binary
+# k3s_vagrant_faas_demo
 
-<u>This is one time task , not need to be done every time you do `vagrant up</u>`
+## Dependancies
 
-##### Download the Airgap docker image
+##### Vagrant - 
 
-For working offline its better to avoid pulling images again and again. 
+Install vagrant
 
-So download the offline k3s docker images from the [k3s repo](https://github.com/rancher/k3s/releases/download/v1.17.4%2Bk3s1/k3s-airgap-images-amd64.tar) to the `docker_images/k3s-airgap-images-amd64-v1.17.4.tar`
+Vagarnt box - This vagant box is based on `bento/centos-7` so better to download that before hand.
 
+##### Task - 
 
-
-```
-wget https://github.com/rancher/k3s/releases/download/v1.17.4%2Bk3s1/k3s-airgap-images-amd64.tar -O docker_images/k3s-airgap-images-amd64-v1.17.4.tar
-```
-
-##### Download all of the required docker images for FAAS frameworks.
-
-There is a list of docker images which are required by FAAS frameworks, which we can pre-download and load it in Vagrant box
-
-Image list  - `docker_images/docker_images_list.txt`
-
-To Download those images run the script ***This is one time task. once you have downloaded the images no need to run this script again***
+Download the task. [Refer](https://taskfile.dev/#/installation) the installation document.  If you are on Mac its simply running 
 
 ```
-bash bin/save_docker_images.sh
+brew install go-task/tap/go-task
 ```
 
-I find the required docker images for offline using below method.
-
-
-```
-grep -w image ../config/fission-core-1.8.0.yaml | sort | uniq | awk -F ":" '{print $2}' | sed 's| ||g'>  docker_images_list.txt
-grep -w image ../config/kubeless-v1.0.6.yaml | sort | uniq | grep -v "," | sed 's| ||g' | grep ^image >> docker_images_list.txt
-grep -w image ../config/openfaas-5.4.1-install.yaml | sort | uniq | grep -v "," | sed 's| ||g' | grep ^image >> docker_images_list.txt
-```
-##### Download the Binary files of the FAAS tools
-
-Just like we download the docker images , we can download the x86 binaries of following tools to the `bin` folder, which gets shared on Vagrant box.
-	   
-
-	fission
-	helm
-	k3s  - https://github.com/rancher/k3s/releases/download/v1.17.4%2Bk3s1/k3s
-	kubeless
-	faas-cli - wget https://github.com/openfaas/faas-cli/releases/download/0.12.2/faas-cli -O bin/faas-cli
-
-Example 
+##### Verify the task list
 
 ```
-wget https://github.com/rancher/k3s/releases/download/v1.17.4%2Bk3s1/k3s bin/k3s
-wget https://github.com/openfaas/faas-cli/releases/download/0.12.2/faas-cli -O bin/faas-cli
+$ task -l
+task: Available tasks for this project:
+* app:deploy:kubeless: 		Deploy the kubeless on this vagrant box
+* app:destroy:kubeless: 	Destory the kubeless on this vagrant box
+* build:download_images: 	Downloads the docker images for offline usage
+* infra:deploy: 		Starts the Vagrant box and installs single node k8s
+* infra:destroy: 		Destroy the vagrant box.
 ```
 
 
 
-# Start the Vagrant box
+# Offline Images
 
-##### Start the Vagrant box and ssh to it
+##### To speed up the installation and to avoid downloading docker images each time vagrant box starts.
+
+There is optional `build:download_images` task which will download all of the required docker images and saves them as .tar
+
+You can run this **first time** to download the images. 
 
 ```
-vagrant up
-vagrant ssh
-
-
-[vagrant@tiber ~]$ kubectl get nodes
-NAME    STATUS   ROLES    AGE   VERSION
-tiber   Ready    master   53s   v1.17.4+k3s1
-
-[vagrant@tiber ~]$ kubectl get pods -n kube-system
-NAME                                      READY   STATUS      RESTARTS   AGE
-metrics-server-6d684c7b5-7xqr8            1/1     Running     0          76s
-local-path-provisioner-58fb86bdfd-x4fg9   1/1     Running     0          76s
-helm-install-traefik-blfhx                0/1     Completed   0          76s
-svclb-traefik-jccfv                       2/2     Running     0          41s
-coredns-6c6bb68b64-pmkpb                  1/1     Running     0          76s
-traefik-7b8b884c8-lzfx2                   1/1     Running     0          41s
-[vagrant@tiber ~]$ docker images
-IMAGE                                           TAG                 IMAGE ID            SIZE
-docker.io/fission/alpinecurl                    latest              1e52658abdee9       7.53MB
-docker.io/fission/fission-bundle                1.8.0               9640fd2dc576e       60.1MB
-docker.io/fission/pre-upgrade-checks            1.8.0               98523d3a9f4c7       50.5MB
-docker.io/kubeless/cronjob-trigger-controller   v1.0.1              aec1dd30bb573       80.3MB
-docker.io/kubeless/function-controller          v1.0.6              4d8c28a732e17       89MB
-docker.io/kubeless/http-trigger-controller      v1.0.1              d6f09f3299d90       87.1MB
-docker.io/library/nats-streaming                0.11.2              fdbad19bf11e5       12.4MB
-docker.io/openfaas/basic-auth-plugin            0.17.0              2d28ce679c626       15.7MB
-docker.io/openfaas/faas-idler                   0.2.1               8591a644ec2c8       24.6MB
-docker.io/openfaas/faas-netes                   0.9.15              388640a30ffd6       58.3MB
-docker.io/openfaas/gateway                      0.18.7              5fd9660e0fd93       29.3MB
-docker.io/openfaas/queue-worker                 0.9.0               81f6956ff09b9       8.71MB
-docker.io/prom/alertmanager                     v0.18.0             ce3c87f17369e       53.3MB
-docker.io/prom/prometheus                       v2.11.0             b97ed892eb236       127MB
-docker.io/rancher/coredns-coredns               1.6.3               c4d3d16fe508b       44.4MB
-docker.io/rancher/klipper-helm                  v0.2.3              274808e7f6b83       138MB
-docker.io/rancher/klipper-lb                    v0.1.2              897ce3c5fc8ff       6.46MB
-docker.io/rancher/library-traefik               1.7.19              aa764f7db3051       86.6MB
-docker.io/rancher/local-path-provisioner        v0.0.11             9d12f9848b99f       36.5MB
-docker.io/rancher/metrics-server                v0.3.6              9dd718864ce61       41.2MB
-docker.io/rancher/pause                         3.1                 da86e6ba6ca19       746kB
+[k3s_vagrant_faas_demo]$ task build:download_images
+image already saved at docker_images/fission_alpinecurl_latest.tar
+image already saved at docker_images/fission_fission-bundle_1.8.0.tar
+image already saved at docker_images/fission_pre-upgrade-checks_1.8.0.tar
+image already saved at docker_images/fission_python-env_latest.tar
+image already saved at docker_images/fission_fetcher_1.8.0.tar
+image already saved at docker_images/kubeless_cronjob-trigger-controller_v1.0.1.tar
+image already saved at docker_images/kubeless_function-controller_v1.0.6.tar
+image already saved at docker_images/kubeless_http-trigger-controller_v1.0.1.tar
+image already saved at docker_images/openfaas_faas-idler_0.2.1.tar
+image already saved at docker_images/nats-streaming_0.11.2.tar
+image already saved at docker_images/openfaas_basic-auth-plugin_0.17.0.tar
+image already saved at docker_images/openfaas_faas-netes_0.9.15.tar
+image already saved at docker_images/openfaas_gateway_0.18.7.tar
+image already saved at docker_images/openfaas_queue-worker_0.9.0.tar
+image already saved at docker_images/prom_alertmanager_v0.18.0.tar
+image already saved at docker_images/prom_prometheus_v2.11.0.tar
+image already saved at docker_images/kubeless_unzip_latest.tar
+image already saved at docker_images/kubeless_python_2.7.tar
+image already saved at docker_images/knative-releases_knative.dev_eventing_cmd_controller_v0.14.0.tar
+image already saved at docker_images/knative-releases_knative.dev_eventing_cmd_webhook_v0.14.0.tar
+image already saved at docker_images/knative-releases_knative.dev_serving_cmd_activator_v0.14.0.tar
+image already saved at docker_images/knative-releases_knative.dev_serving_cmd_autoscaler_v0.14.0.tar
+image already saved at docker_images/knative-releases_knative.dev_serving_cmd_controller_v0.14.0.tar
+image already saved at docker_images/knative-releases_knative.dev_serving_cmd_webhook_v0.14.0.tar
+image already saved at docker_images/knative-releases_knative.dev_net-kourier_cmd_kourier_v0.14.0.tar
+image already saved at docker_images/knative-releases_knative.dev_serving_cmd_queue_v0.14.0.tar
+image already saved at docker_images/maistra_proxyv2-ubi8_1.0.8.tar
+image already saved at docker_images/junaid18183_knative-demo-python_latest.tar
+image already saved at docker_images/junaid18183_openfass-python-demo_latest.tar
 ```
 
 
+
+## Deploy
+
+To deploy the Vagrant box , run the  command  `task infra:deploy` 
+
+```
+$ task infra:deploy
+
+Bringing machine 'default' up with 'virtualbox' provider...
+==> default: Importing base box 'bento/centos-7'...
+==> default: Matching MAC address for NAT networking...
+==> default: Checking if box 'bento/centos-7' is up to date...
+==> default: A newer version of the box 'bento/centos-7' for provider 'virtualbox' is
+==> default: available! You currently have version '201812.27.0'. The latest is version
+==> default: '202004.15.0'. Run `vagrant box update` to update.
+==> default: Setting the name of the VM: k3s_vagrant_faas_demo_default_1587819244181_26592
+==> default: Clearing any previously set network interfaces...
+==> default: Preparing network interfaces based on configuration...
+    default: Adapter 1: nat
+    default: Adapter 2: hostonly
+==> default: Forwarding ports...
+    default: 22 (guest) => 2222 (host) (adapter 1)
+==> default: Running 'pre-boot' VM customizations...
+==> default: Booting VM...
+==> default: Waiting for machine to boot. This may take a few minutes...
+    default: SSH address: 127.0.0.1:2222
+    default: SSH username: vagrant
+    default: SSH auth method: private key
+    default:
+    default: Vagrant insecure key detected. Vagrant will automatically replace
+    default: this with a newly generated keypair for better security.
+    default:
+    default: Inserting generated public key within guest...
+    default: Removing insecure key from the guest if it's present...
+    default: Key inserted! Disconnecting and reconnecting using new SSH key...
+==> default: Machine booted and ready!
+==> default: Checking for guest additions in VM...
+==> default: Setting hostname...
+==> default: Configuring and enabling network interfaces...
+==> default: Mounting shared folders...
+    default: /vagrant => /Users/jmemon/work/git/vagrant_boxes/k3s_vagrant_faas_demo
+    default: /home/vagrant/git => /Users/jmemon/work/git
+==> default: Running provisioner: shell...
+    default: Running: inline script
+    default: [INFO]  Skipping k3s download and verify
+    default: [INFO]  Creating /usr/local/bin/kubectl symlink to k3s
+    default: [INFO]  Creating /usr/local/bin/crictl symlink to k3s
+    default: [INFO]  Creating uninstall script /usr/local/bin/k3s-uninstall.sh
+    default: [INFO]  systemd: Creating environment file /etc/systemd/system/k3s.service.env
+    default: [INFO]  systemd: Creating service file /etc/systemd/system/k3s.service
+    default: [INFO]  systemd: Enabling k3s unit
+    default: Created symlink from /etc/systemd/system/multi-user.target.wants/k3s.service to /etc/systemd/system/k3s.service.
+    default: [INFO]  systemd: Starting k3s
+    default: namespace/kubeless created
+    default: namespace/fission created
+    default: namespace/openfaas created
+    default: namespace/openfaas-fn created
+NAME                           STATUS   ROLES    AGE   VERSION
+ip-10-64-12-208.ec2.internal   Ready    master   23h   v1.15.3
+```
+
+
+
+## Destroy 
+
+To destoy the Vagrant box  , run the  command  `task infra:destroy` 
+
+```
+$ task infra:destroy
+==> default: Forcing shutdown of VM...
+==> default: Destroying VM and associated drives...
+```
+
+
+
+------
+
+# FAAS Frameworks
 
 # Fission 
 
 ##### Install Fission
+
+To install the fission run the rake task
 
 ```
 k apply -f /vagrant/config/fission-core-1.8.0.yaml
@@ -180,6 +231,8 @@ curl 172.28.128.4:$NODEPORT/fission_demo
 *This curl since its using NodePort service will also work from your laptop.*
 
 ##### Clean-up
+
+To destroy the fission, run the task `app:destroy:fission`
 
 - Delete the route/trigger 
 

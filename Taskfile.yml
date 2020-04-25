@@ -28,7 +28,7 @@ tasks:
       - test -f docker_images/k3s-airgap-images-amd64-v1.17.4.tar
     cmds:
       - vagrant up
-      - sleep 10
+      - sleep 5
       - kubectl get nodes
 
   infra:destroy:
@@ -42,11 +42,13 @@ tasks:
       - vagrant up
     cmds:
       - kubectl apply -f config/kubeless-v1.0.6.yaml
+      - kubectl get pods -n kubeless
 
   app:destroy:kubeless:
     desc: Destory the kubeless on this vagrant box
     cmds:
-      - kubectl get pods -n kube-system
+      - kubectl delete -f config/kubeless-v1.0.6.yaml
+      - kubectl delete function hello
 
   app:deploy:fission:
     desc: Deploy the kubeless on this vagrant box
@@ -54,8 +56,10 @@ tasks:
       - vagrant up
     cmds:
       - kubectl apply -f config/fission-core-1.8.0.yaml
+      - kubectl get pods -n fission
 
   app:destroy:fission:
     desc: Destory the kubeless on this vagrant box
     cmds:
-      - kubectl get pods -n kube-system
+      - kubectl delete function hello-fission
+      - kubectl delete -f config/fission-core-1.8.0.yaml

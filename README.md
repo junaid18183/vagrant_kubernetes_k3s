@@ -28,6 +28,28 @@ task: Available tasks for this project:
 * infra:destroy: 		Destroy the vagrant box.
 ```
 
+Download the following binaries at the  in `bin/` directory.  
+
+**fission** 
+
+**kubeless**
+
+**fass-cli**
+
+
+
+Accessing the cluster 
+
+The `infra:deploy` will create a kubeconfig file at ./kubeconfig.yml. 
+
+If you want to access the k8s cluser from your host machine set the KUBECONFIG environment variable.
+
+```
+export KUBECONFIG=kubeconfig.yml
+```
+
+You can then run the `kubectl` commands from either your host machine or vagrant box. To run from the vagrant box, you need to ssh to it using `vagrant ssh`
+
 
 
 # Offline Images
@@ -155,26 +177,62 @@ $ task infra:destroy
 
 ##### Install Fission
 
-To install the fission run the rake task
+To install the fission run the rake task `task app:deploy:fission`
+
+##### Check the status of fission deployment
+
+Login to vagrant box. `vagrant ssh`
 
 ```
-k apply -f /vagrant/config/fission-core-1.8.0.yaml
+[vagrant@tiber ~]$ kubectl get pods -n fission
+
+```
+
+```
+task app:deploy:fission
+namespace/fission-function unchanged
+namespace/fission-builder unchanged
+clusterrole.rbac.authorization.k8s.io/secret-configmap-getter unchanged
+clusterrole.rbac.authorization.k8s.io/package-getter unchanged
+serviceaccount/fission-svc unchanged
+rolebinding.rbac.authorization.k8s.io/fission-admin unchanged
+clusterrolebinding.rbac.authorization.k8s.io/fission-crd unchanged
+serviceaccount/fission-fetcher unchanged
+serviceaccount/fission-builder unchanged
+configmap/feature-config unchanged
+deployment.apps/controller configured
+deployment.apps/executor configured
+deployment.apps/buildermgr configured
+deployment.apps/kubewatcher configured
+deployment.apps/timer configured
+deployment.apps/storagesvc configured
+persistentvolumeclaim/fission-storage-pvc unchanged
+service/router unchanged
+service/controller unchanged
+service/storagesvc unchanged
+service/executor unchanged
+deployment.apps/router configured
+job.batch/fission-1-8-0-fission-co-1.8.0-182 configured
+job.batch/fission-1-8-0-fission-co-1.8.0-480 unchanged
+
 ```
 
 ##### Check the status of fission deployment
 
+Login to vagrant box. `vagrant ssh`
+
 ```
-[vagrant@tiber ~]$ k get pods -n fission
-NAME                                       READY   STATUS    RESTARTS   AGE
-fission-1-8-0-fission-co-1.8.0-480-d6h7v   0/1     Pending   0          22s
-router-dd6bbfdcb-b7ncc                     0/1     Pending   0          21s
-storagesvc-7877594985-jgs84                0/1     Pending   0          21s
-controller-7c74dd9695-5xnxm                0/1     Pending   0          21s
-timer-dfbdc8489-gg2nm                      0/1     Pending   0          21s
-executor-6c848fd97b-vb7jj                  0/1     Pending   0          21s
-kubewatcher-6b55dfcfff-k8ftr               0/1     Pending   0          21s
-buildermgr-77798686b9-6x7mb                0/1     Pending   0          21s
-fission-1-8-0-fission-co-1.8.0-182-zn9s4   0/1     Pending   0          21s
+[vagrant@tiber ~]$ kubectl get pods -n fission
+NAME                                       READY   STATUS      RESTARTS   AGE
+fission-1-8-0-fission-co-1.8.0-480-8qnht   0/1     Completed   0          77s
+buildermgr-77798686b9-wnmmz                1/1     Running     0          78s
+executor-6c848fd97b-xt2fm                  1/1     Running     0          78s
+router-dd6bbfdcb-2jsqj                     1/1     Running     0          77s
+controller-7c74dd9695-l9v52                1/1     Running     0          78s
+kubewatcher-6b55dfcfff-xb6x5               1/1     Running     1          78s
+timer-dfbdc8489-rlxch                      1/1     Running     1          78s
+fission-1-8-0-fission-co-1.8.0-182-nn48l   0/1     Completed   0          77s
+storagesvc-7877594985-qb4kn                1/1     Running     0          78s
 ```
 
 **Wait till pods are in running status.  Its fine to `storagesvc` pod to be in pending status.**
@@ -188,7 +246,7 @@ fission-1-8-0-fission-co-1.8.0-182-zn9s4   0/1     Pending   0          21s
 Check the pods in fission_function namespace 
 
 ```
-[vagrant@tiber ~]$ k get pods -n fission-function
+[vagrant@tiber ~]$ kubectl get pods -n fission-function
 NAME                                         READY   STATUS    RESTARTS   AGE
 poolmgr-python-default-903-fd7c84b7b-7592x   2/2     Running   0          44s
 poolmgr-python-default-903-fd7c84b7b-cj8dl   2/2     Running   0          44s
@@ -204,7 +262,7 @@ fission function create --name hello-fission --env python --code /vagrant/demo_f
 Check k8s function resource
 
 ```
-k get functions
+kubectl get functions
 ```
 
 ##### Test the sample function
@@ -228,34 +286,27 @@ NODEPORT=$(kubectl --namespace fission get svc router -o=jsonpath='{..nodePort}'
 curl 172.28.128.4:$NODEPORT/fission_demo
 ```
 
-*This curl since its using NodePort service will also work from your laptop.*
+*This curl  will also work from your laptop , since we are using NodePort service*
 
 ##### Clean-up
 
 To destroy the fission, run the task `app:destroy:fission`
 
-- Delete the route/trigger 
+```
+task app:destroy:fission
+```
 
-- Delete the function using fission or kubectl 
 
-- Delete the fission CRD
-
-  ```
-  k delete function hello-fission
-  k delete -f /vagrant/config/fission-core-1.8.0.yaml
-  ```
-
-  
 
 # Kubeless 
 
 ##### Install kubeless 
 
-```
-/usr/local/bin/kubectl apply -f /vagrant/config/kubeless-v1.0.6.yaml
-```
+Run the `task app:deploy:kubeles` task
 
-Confirm all pods are running 
+**Confirm all pods are running** 
+
+Login to vagrant box. `vagrant ssh`
 
 ```
 kubectl get pods -n kubeless
@@ -268,7 +319,7 @@ kubeless-controller-manager-57d495575b-l95sc   3/3     Running   0          4m30
 ##### Create the first function 
 
 ```
-kubeless function deploy hello --runtime python2.7  --from-file /vagrant/demo_functions/kubeless_demo.py --handler test.hello --image-pull-policy IfNotPresent
+/usr/local/bin/kubeless function deploy hello --runtime python2.7  --from-file /vagrant/demo_functions/kubeless_demo.py --handler test.hello --image-pull-policy IfNotPresent
 ```
 
 Confirm the function pods are in running state 
@@ -319,8 +370,7 @@ curl  -H 'Host: faas.ijuned.com' --data 'Hello world!' http://172.28.128.4
 ##### Cleanup 
 
 ```
-k delete function hello
-k delete -f /vagrant/config/kubeless-v1.0.6.yaml
+task app:destroy:kubeless
 ```
 
 

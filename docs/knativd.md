@@ -70,6 +70,15 @@ Additionaly I have added the `imagePullPolicy: IfnotPresent` in the service.yaml
 
 ##### Deploy the function
 
+You can do these steps either from your host machine or from the vagrant box. 
+
+If you are operating from within vagrant box, ssh to vagrant and cd to /vagrant directory.
+
+```
+vagrant ssh
+cd /vagrant
+```
+
 After the build has completed and the container is pushed to docker hub, you can deploy the app into your cluster. Ensure that the container image value in service.yaml matches the container you built in the previous step. Apply the configuration using kubectl
 
 ```
@@ -84,10 +93,20 @@ NAME                  URL                                              LATESTCRE
 knative-demo-python   http://knative-demo-python.default.example.com   knative-demo-python-bw9cw   knative-demo-python-bw9cw   True
 ```
 
-Get the NodePort 
+##### Check the pod
+
+```
+$ kubectl get pods
+NAME                                                    READY   STATUS    RESTARTS   AGE
+knative-demo-python-jhwvg-deployment-5987d6f779-vpsqf   2/2     Running   0          28s
+```
+
+##### Get the NodePort 
 
 ```
 NODEPORT=$(kubectl get svc kourier -n kourier-system -o=jsonpath='{.spec.ports[0].nodePort}')
+
+echo $NODEPORT
 ```
 
 Test the Function

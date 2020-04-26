@@ -1,8 +1,16 @@
 # OpenFaas
 
+Official openfaas [documentation](https://docs.openfaas.com/)
+
+##### Pre-requisite
+
+Make sure you have downloaded the `faas-cli` binary 
+
+The binary should be present in `./bin` folder if you want to operate it from vagrant box. And if you are operating from your host machine it should be in your $PATH.
+
 ##### Install
 
-To install the fission run the task `app:deploy:openfaas`
+To install the fission run the task `task app:deploy:openfaas`
 
 If you want to operate from your host machine, export the KUBECONFIG variable
 
@@ -19,7 +27,7 @@ vagrant ssh
 ##### Check the status of openfaas deployment
 
 ```
-[vagrant@tiber docker_images]$ k get pods -n openfaas
+[vagrant@tiber docker_images]$ kubectl get pods -n openfaas
 NAME                                 READY   STATUS    RESTARTS   AGE
 nats-6775fc6c6c-npw66                1/1     Running   0          40s
 basic-auth-plugin-5565697c9b-fnzls   1/1     Running   0          40s
@@ -34,9 +42,10 @@ faas-idler-9d84bf69b-9wf8c           1/1     Running   2          40s
 
 ```
 NODEPORT=$(kubectl get svc gateway-external  -n openfaas -o=jsonpath='{..nodePort}')
+echo $NODEPORT
 ```
 
-The UI will be available at `<http://172.28.128.4:$NODEPORT/ui/>`
+The UI will be available at [http://172.28.128.4:$NODEPORT/ui/](http://172.28.128.4:31112/ui/)
 
 ##### Credentails for the UI or faas-cli will be 
 

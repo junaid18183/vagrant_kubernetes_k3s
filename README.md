@@ -6,9 +6,9 @@ This is a sample vagrant box , which will help you to start the single node kube
 
 It also have configuration to install and configure the  FAAS frameworks with very simple `task` command.
 
-- kubeless - Official release [page](https://github.com/kubeless/kubeless/releases) 
+- kubeless
 
-- fission - Official install [document](https://docs.fission.io/docs/installation/#install-fission-cli) 
+- fission
 
 - openfass
 
@@ -67,13 +67,13 @@ task: Available tasks for this project:
 
 Download the following binaries at the  in `bin/` directory.  So that you can use then within vagrant box. Or you can install them on your host machine as well.
 
-**fission** - 
+**fission** -  Official install [document](https://docs.fission.io/docs/installation/#install-fission-cli) 
 
-**kubeless** - 
+**kubeless** -  Official release [page](https://github.com/kubeless/kubeless/releases) 
 
-**fass-cli** - 
+**fass-cli** - Official release [page](https://github.com/openfaas/faas-cli/releases)
 
-**kubectl** - 
+**kubectl** - Official install [document](https://v1-16.docs.kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 
 

@@ -19,13 +19,6 @@ echo "alias docker='sudo /usr/local/bin/k3s crictl'" >> /etc/profile.d/sh.local
 /usr/local/bin/kubectl create ns openfaas
 /usr/local/bin/kubectl create ns openfaas-fn
 
-#/usr/local/bin/kubectl create -f /vagrant/config/kubeless-v1.0.6.yaml
-#/usr/local/bin/kubectl create -f /vagrant/config/fission-core-1.8.0.yaml
-#/usr/local/bin/kubectl create -f /vagrant/config/openfaas-5.4.1-install.yaml
-
-#/usr/local/bin/kubectl create serviceaccount --namespace kube-system tiller
-#/usr/local/bin/kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-#/usr/local/bin/helm  init --service-account tiller
 
 mkdir -p /home/vagrant/.kube/
 mkdir -p /root/.kube/
@@ -47,8 +40,5 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
      vb.memory = "2048"
    end
-  config.vm.synced_folder "/Users/jmemon/work/git", "/home/vagrant/git"
+  config.vm.synced_folder git_dir=ENV['SHARED_CODE'] || ENV['HOME']+"/git", "/home/vagrant/git"
 end
-
-#kubectl create deployment --image nginx my-nginx
-#kubectl expose deployment my-nginx --port=80 --type=NodePort

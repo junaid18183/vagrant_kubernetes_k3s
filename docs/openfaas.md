@@ -67,6 +67,64 @@ faas-cli login --password $PASSWD --gateway 172.28.128.4:$NODEPORT
 
 ## Sample Demo function
 
+Openfaas just like knative requires your function to be packaged as docker image first. And then using a yaml file containing the docker image from registry you can deploy the function.
+
+I have created a sample docker image and pushed to `junaid18183/openfass-python-demo:latest`
+
+To see the source code of the function check the `demo_functions/openfass_demo` directory.
+
+*You can do these steps either from your host machine or from the vagrant box.* 
+
+*If you are operating from within vagrant box, ssh to vagrant and cd to /vagrant directory.*
+
+```
+vagrant ssh
+cd /vagrant
+```
+
+To create and push the docker image you can use the `faas-cli` as below 
+
+```
+cd demo_functions/openfass_demo
+faas-cli new --lang python openfass-python-demo
+#Change the code in openfass-python-demo/handler.py
+
+faas-cli build -f  ./openfass-python-demo.yml
+faas-cli push -f ./openfass-python-demo.yml
+
+```
+
+##### Deploy the function
+
+```
+cd demo_functions/openfass_demo/
+
+faas-cli deploy -f ./openfass-python-demo.yml
+Deploying: openfass-python-demo.
+WARNING! Communication is not secure, please consider using HTTPS. Letsencrypt.org offers free SSL/TLS certificates.
+
+Deployed. 202 Accepted.
+URL: http://172.28.128.4:31112/function/openfass-python-demo
+```
+
+Check the pods is started in openfaas-fn namespace
+
+```
+$ k get pods -n openfaas-fn
+NAME                                    READY   STATUS    RESTARTS   AGE
+openfass-python-demo-5455c8c54b-28jjn   1/1     Running   0          82s
+```
+
+##### Test the function
+
+```
+$ curl http://172.28.128.4:31112/function/openfass-python-demo -d "Hello World"
+Hello! You said: Hello World
+Hello World
+```
+
+
+
 ## Cleanup 
 
 ```

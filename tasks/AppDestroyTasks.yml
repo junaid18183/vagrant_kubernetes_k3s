@@ -1,0 +1,39 @@
+version: '2'
+silent: true
+env:
+  KUBECONFIG: kubeconfig.yml
+
+tasks:
+  all:
+    desc: Destroy all of the faas frameworks
+    deps: [kubeless,fission,openfaas,knative]
+    preconditions:
+      - vagrant up
+  kubeless:
+    desc: Destory the kubeless on this vagrant box
+    cmds:
+      - cmd: kubectl delete function hello
+        ignore_error: true
+      - cmd: kubectl delete -f config/kubeless-v1.0.6.yaml
+  fission:
+    desc: Destory the kubeless on this vagrant box
+    cmds:
+      - cmd: kubectl delete function hello-fission
+        ignore_error: true
+      - cmd: kubectl delete -f config/fission-core-1.8.0.yaml
+
+  openfaas:
+    desc: Destory the openfaas on this vagrant box
+    cmds:
+      - cmd: kubectl delete deploy openfass-python-demo -n openfaas-fn
+        ignore_error: true
+      - kubectl delete -f config/openfaas-5.4.1-install.yaml
+
+  knative:
+    desc: Destory the knative on this vagrant box
+    cmds:
+      - cmd: kubectl delete ksvc knative-demo-python
+        ignore_error: true
+      - kubectl delete -f config/knative/serving-crds.yaml
+      - kubectl delete -f config/knative/serving-core.yaml
+      - kubectl delete -f config/knative/kourier.yaml

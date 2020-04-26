@@ -3,6 +3,7 @@
 
 # This script to install Kubernetes will get executed after we have provisioned the box
 $script = <<-SCRIPT
+> /vagrant/kubeconfig.yml
 cp /vagrant/bin/* /usr/local/bin/
 
 mkdir -p /var/lib/rancher/k3s/agent/images
@@ -33,7 +34,7 @@ cp /etc/rancher/k3s/k3s.yaml /home/vagrant/.kube/config && chown vagrant:vagrant
 cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
 cp /etc/rancher/k3s/k3s.yaml /vagrant/kubeconfig.yml
 
-sed -i 's|localhost|tiber|g' /vagrant/kubeconfig.yml
+sed -i 's|127.0.0.1|172.28.128.4|g' /vagrant/kubeconfig.yml
 sed -i 's|default|k3s-tiber|g' /vagrant/kubeconfig.yml
 
 SCRIPT

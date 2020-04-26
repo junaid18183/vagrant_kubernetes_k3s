@@ -1,0 +1,14 @@
+version: '2'
+silent: true
+env:
+  KUBECONFIG: kubeconfig.yml
+includes:
+  build: tasks/BuildTasks.yml
+  infra: tasks/InfraTasks.yml
+  app:deploy: tasks/AppDeployTasks.yml
+  app:destroy: tasks/AppDestroyTasks.yml
+  
+tasks:
+  default:
+    cmds:
+      - echo "Check the README.md"

@@ -1,0 +1,20 @@
+version: '2'
+silent: true
+
+tasks:
+  download_images:
+    desc: Downloads the docker images for offline usage
+    summary: |
+      It will download all the requird docker images mentioned in docker_images/docker_images_list.txt
+      So that you can run the demo without internet. And avoid downloading them multiple times.
+    cmds:
+      - ./bin/save_docker_images.sh
+
+  binary:
+    desc: Download the required binaries
+    cmds:
+      - ./bin/download-k3s.sh
+    generates:
+      - bin/k3s
+      - docker_images/k3s-airgap-images-amd64-v1.17.4.tar
+    method: checksum

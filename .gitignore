@@ -1,4 +1,5 @@
 .vagrant/**
+.task/**
 kubeconfig.yml
 docker_images/*.tar
 bin/**

@@ -25,6 +25,8 @@ tasks:
   openfaas:
     desc: Destory the openfaas on this vagrant box
     cmds:
+      - cmd: kubectl delete deploy openfass-python-demo -n openfaas-fn
+        ignore_error: true
       - kubectl delete -f config/openfaas-5.4.1-install.yaml
 
   knative:

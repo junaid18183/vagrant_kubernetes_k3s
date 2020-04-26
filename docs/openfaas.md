@@ -115,6 +115,14 @@ NAME                                    READY   STATUS    RESTARTS   AGE
 openfass-python-demo-5455c8c54b-28jjn   1/1     Running   0          82s
 ```
 
+Check the function using `faas-cli`
+
+```
+OPENFAAS_URL=http://172.28.128.4:31112 faas-cli list
+Function                      	Invocations    	Replicas
+openfass-python-demo          	3              	1
+```
+
 ##### Test the function
 
 ```
@@ -125,9 +133,18 @@ Hello World
 
 
 
+Addionaly you can use openfaas UI to deploy the function.
+
+
+
 ## Cleanup 
 
 ```
 task app:destroy:openfaas
 ```
 
+
+
+##### References
+
+<https://blog.alexellis.io/first-faas-python-function/>

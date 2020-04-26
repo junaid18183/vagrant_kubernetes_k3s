@@ -14,3 +14,7 @@ tasks:
     desc: Download the required binaries
     cmds:
       - ./bin/download-k3s.sh
+    generates:
+      - bin/k3s
+      - docker_images/k3s-airgap-images-amd64-v1.17.4.tar
+    method: checksum

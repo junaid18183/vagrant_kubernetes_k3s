@@ -73,8 +73,6 @@ Download the following binaries at the  in `bin/` directory.  So that you can us
 
 **fass-cli** - Official release [page](https://github.com/openfaas/faas-cli/releases)
 
-**kubectl** - Official install [document](https://v1-16.docs.kubernetes.io/docs/tasks/tools/install-kubectl/)
-
 
 
 ##### Accessing the cluster 

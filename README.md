@@ -153,7 +153,6 @@ $ task infra:destroy
 ```
 
 
-
 ## FAAS framework deployment
 
 The project provides a simple `app:deploy:all` task to deploy all four serverless faas framework. 

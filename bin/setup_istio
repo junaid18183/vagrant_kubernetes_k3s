@@ -1,0 +1,142 @@
+#!/bin/bash
+set -o pipefail
+
+# more great ideas from http://kvz.io/blog/2013/11/21/bash-best-practices/
+# See here for in-depth study: http://www.tldp.org/LDP/abs/html/index.html
+set -o errexit
+
+#------------------------------------------------------------------------------------------------------
+BASE_DIR=$(dirname "$0")
+FAILED_PRECHECKS=false
+KUBE_CONFIG="/root/.kube/config"
+ISTIO_CTL="/usr/local/bin/istioctl"
+ISTIO_NAMESPACE="istio-system"
+ISTIO_PROFILE_DIR="/vagrant/istio_profiles"
+ISTIOCTL_MANIFEST="/vagrant/istio_profiles/config/istioctl-install.yaml"
+KUBECTL_MANIFEST="/vagrant/istio_profiles/config/kubectl-install.yaml"
+ISTIO_PROFILE="sample-demo"
+KUBECTL="/usr/local/bin/kubectl"
+
+#------------------------------------------------------------------------------------------------------
+log() {
+  echo "$(date -u) - $*"
+}
+
+logError() {
+  echo "$(date -u) - $*" >&2
+}
+
+init_kube_config() {
+  KUBE_CONFIG="$1"
+
+  if [[ ${KUBE_CONFIG} == "" && -z "${KUBECONFIG:=}" ]]; then
+    KUBE_CONFIG="$HOME/.kube/config"
+  fi
+
+  if [ ! -f "${KUBE_CONFIG}" ]; then
+    logError "Cannot find kube config file: ${KUBE_CONFIG}"
+    return 1
+  fi
+}
+
+validate_kubernetes() {
+  local kube_config=$1
+
+  init_kube_config "${kube_config}"
+
+  type -p $KUBECTL >/dev/null || {
+    logError "'kubectl' must be on the execution path"
+    return 1
+  }
+
+  log "Verifying cluster is accessible using kubectl..."
+  if ! $KUBECTL get pods --kubeconfig "${KUBE_CONFIG}" >/dev/null 2>&1; then
+    logError "Failed to execute kubectl. User kube config file must have sufficient permissions."
+    return 1
+  fi
+
+  echo ""
+}
+
+select_profile() {
+  local selected_profile=$1
+  local profile_dir="/vagrant/istio_profiles"
+
+  if [[ -z ${selected_profile} ]]; then
+    local profiles=$(find "${profile_dir}" -name *.yaml -exec basename {} \; | cut -d '.' -f 1)
+    local prompt_profiles=$(echo -n ${profiles} | tr ' ' ',')
+
+    read -rp "Select a profile [${prompt_profiles}]: " selected_profile
+  fi
+
+  echo "${selected_profile}"
+}
+
+perform_prechecks() {
+  local ns_option=""
+
+  if [[ -n ${ISTIO_NAMESPACE} ]]; then
+    ns_option="-i ${ISTIO_NAMESPACE}"
+  fi
+
+  ${ISTIO_CTL} --kubeconfig ${KUBE_CONFIG} verify-install ${ns_option} >/dev/null 2>&1 && return
+
+  logError "cluster is not ready for istio installation..."
+  ${ISTIO_CTL} --kubeconfig ${KUBE_CONFIG} verify-install ${ns_option}
+  return 1
+}
+
+install_istio() {
+  local selected_profile=$1
+
+  if [[ -n ${ISTIO_NAMESPACE} ]]; then
+
+    if ! kubectl get ns ${ISTIO_NAMESPACE} --kubeconfig "${KUBE_CONFIG}" >/dev/null 2>&1; then
+      if ! $KUBECTL create ns ${ISTIO_NAMESPACE} --kubeconfig "${KUBE_CONFIG}" >/dev/null; then
+        logError "Failed to create namespace: ${ISTIO_NAMESPACE}"
+        return 1
+      fi
+    fi
+
+    # NOTE: open issue against istio (this does not work yet) https://github.com/istio/istio/issues/22445
+    # for now, this is a workaround
+    sed -i "/spec:/a \ \ values:\n    global:\n      istioNamespace: ${ISTIO_NAMESPACE}" ${ISTIOCTL_MANIFEST}
+  fi
+
+  local image_set_cmd="--set hub=istio \
+        --set values.grafana.image.repository=grafana/grafana \
+        --set values.kiali.hub=kiali \
+        --set values.prometheus.hub=prom \
+        --set values.tracing.jaeger.hub=jaegertracing"
+
+  ${ISTIO_CTL} --kubeconfig ${KUBE_CONFIG} manifest apply -f ${ISTIOCTL_MANIFEST} ${image_set_cmd} 2>/dev/null ||
+    (logError "istio installation failed (manifest for selected profile: ${selected_profile} could not be applied)" &&
+      return 1)
+
+  ${ISTIO_CTL} --kubeconfig ${KUBE_CONFIG} manifest generate -f ${ISTIOCTL_MANIFEST} >${KUBECTL_MANIFEST} 2>/dev/null ||
+    (logError "failed to generate kubectl manifest for selected profile: ${selected_profile} could not be applied)" &&
+      return 1)
+
+  local n=0
+  until [ $n -ge 20 ]; do
+    ${ISTIO_CTL} --kubeconfig ${KUBE_CONFIG} verify-install -f ${KUBECTL_MANIFEST} >/dev/null 2>&1 &&
+      break
+    n=$(($n + 1))
+    log "Waiting for istio to be ready ..."
+    sleep 15
+  done
+
+  [[ $n -lt 10 ]] && return
+
+  if ! ${ISTIO_CTL} --kubeconfig ${KUBE_CONFIG} verify-install -f ${KUBECTL_MANIFEST}; then
+    logError "istio does not seem to be ready, exiting ..."
+  fi
+}
+
+start() {
+  validate_kubernetes
+  perform_prechecks
+  install_istio ${ISTIO_PROFILE}
+}
+
+start

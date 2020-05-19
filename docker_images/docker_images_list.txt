@@ -1,2 +1,6 @@
-junaid18183/knative-demo-python:latest
-junaid18183/openfass-python-demo:latest
+grafana/grafana:6.5.2
+prom/prometheus:v2.15.1
+istio/pilot:1.5.2
+istio/proxyv2:1.5.2
+jaegertracing/all-in-one:1.16
+kiali/kiali:v1.15

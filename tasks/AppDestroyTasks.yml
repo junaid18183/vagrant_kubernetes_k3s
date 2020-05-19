@@ -2,3 +2,8 @@ version: '2'
 silent: true
 env:
   KUBECONFIG: kubeconfig.yml
+tasks:
+  istio:
+    desc: Destrory the istio on this vagrant box
+    cmds:
+      - kubectl delete ns istio-system

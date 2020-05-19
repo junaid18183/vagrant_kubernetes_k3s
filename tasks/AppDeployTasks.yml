@@ -2,3 +2,10 @@ version: '2'
 silent: true
 env:
   KUBECONFIG: kubeconfig.yml
+
+tasks:
+  istio:
+    desc: Deploy the istio on this vagrant box
+    cmds:
+      - vagrant ssh -c 'bash /vagrant/bin/setup_istio'
+      - kubectl get pods -n istio-system

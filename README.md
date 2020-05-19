@@ -1,4 +1,4 @@
-# k3s_vagrant_faas_demo
+# vagrant_kubernetes_k3s
 
 ## Introduction 
 

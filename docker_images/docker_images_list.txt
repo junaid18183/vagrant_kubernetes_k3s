@@ -1,2 +1,1 @@
-junaid18183/knative-demo-python:latest
-junaid18183/openfass-python-demo:latest
+docker.io/nginx:latest

@@ -14,12 +14,6 @@ INSTALL_K3S_SKIP_DOWNLOAD=true /vagrant/bin/install-k3s.sh server --tls-san tibe
 echo "alias k=/usr/local/bin/kubectl" >> /etc/profile.d/sh.local
 echo "alias docker='sudo /usr/local/bin/k3s crictl'" >> /etc/profile.d/sh.local
 
-/usr/local/bin/kubectl create ns kubeless
-/usr/local/bin/kubectl create ns fission
-/usr/local/bin/kubectl create ns openfaas
-/usr/local/bin/kubectl create ns openfaas-fn
-
-
 mkdir -p /home/vagrant/.kube/
 mkdir -p /root/.kube/
 

@@ -4,3 +4,4 @@ istio/pilot:1.5.2
 istio/proxyv2:1.5.2
 jaegertracing/all-in-one:1.16
 kiali/kiali:v1.15
+docker.io/nginx:latest

@@ -1,9 +1,5 @@
 .vagrant/**
 .task/**
 kubeconfig.yml
-docker_images/*.tar
+docker_images/**
 bin/**
-docker_images/docker_images_list.txt.orig
-demo_functions/openfass_demo/templates
-demo_functions/openfass_demo/build
-istio_profiles/config/kubectl-install.yaml

@@ -8,6 +8,7 @@ cp /vagrant/bin/* /usr/local/bin/
 
 mkdir -p /var/lib/rancher/k3s/agent/images
 cp /vagrant/docker_images/*.tar /var/lib/rancher/k3s/agent/images/
+cp /vagrant/docker_images/*/*.tar /var/lib/rancher/k3s/agent/images/
 
 INSTALL_K3S_SKIP_DOWNLOAD=true /vagrant/bin/install-k3s.sh server --tls-san tiber --write-kubeconfig-mode=644 --flannel-iface=eth1 --node-ip=172.28.128.4
 

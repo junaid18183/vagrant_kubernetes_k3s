@@ -8,7 +8,7 @@ tasks:
     desc: Starts the Vagrant box and installs single node k8s
     preconditions:
       - test -f bin/k3s
-      - test -f docker_images/k3s-airgap-images-amd64-v1.17.4.tar
+      - test -f docker_images/k3s-airgap-images-amd64-v1.18.10+k3s1.tar
     cmds:
       - task: :build:binary
       - vagrant up

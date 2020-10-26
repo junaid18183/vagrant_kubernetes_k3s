@@ -1,7 +1,9 @@
 #! /bin/bash
 
-AIRGAP_K3_IMAGES_SOURCE=https://github.com/rancher/k3s/releases/download/v1.17.4%2Bk3s1/k3s-airgap-images-amd64.tar
-AIRGAP_K3_IMAGES="docker_images/k3s-airgap-images-amd64-v1.17.4.tar"
+K3S_VERSION="v1.18.10+k3s1"
+
+AIRGAP_K3_IMAGES_SOURCE=https://github.com/rancher/k3s/releases/download/$K3S_VERSION/k3s-airgap-images-amd64.tar
+AIRGAP_K3_IMAGES="docker_images/k3s-airgap-images-amd64-$K3S_VERSION.tar"
 
 if [ -f "$AIRGAP_K3_IMAGES" ] ; then
         echo "Airgap k3s docker images already present at $AIRGAP_K3_IMAGES"
@@ -11,7 +13,7 @@ if [ -f "$AIRGAP_K3_IMAGES" ] ; then
 fi
 
 
-K3S_SOURCE=https://github.com/rancher/k3s/releases/download/v1.17.4%2Bk3s1/k3s
+K3S_SOURCE=https://github.com/rancher/k3s/releases/download/$K3S_VERSION/k3s
 K3S_BINARY="bin/k3s"
 
 if [ -f "$K3S_BINARY" ] ; then

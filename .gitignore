@@ -3,3 +3,4 @@
 kubeconfig.yml
 docker_images/**
 bin/**
+.envrc

@@ -12,6 +12,10 @@ Install vagrant - Refer the official installation [document](https://www.vagrant
 
 Vagarnt box - This vagant box is based on `bento/centos-7` so better to download that before hand.
 
+```
+vagrant box add bento/centos-7
+```
+
 ##### Task - 
 
 Install the task. Refer the official installation [document](https://taskfile.dev/#/installation) the installation document.  If you are on Mac its simply running 
@@ -23,6 +27,7 @@ brew install go-task/tap/go-task
 ##### Verify the task list
 
 ```
+$ task -l
 task: Available tasks for this project:
 * build:binary: 		Download the required binaries
 * build:download_images: 	Downloads the docker images for offline usage

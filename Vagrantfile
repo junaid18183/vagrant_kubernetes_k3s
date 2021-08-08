@@ -35,5 +35,5 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
      vb.memory = "2048"
    end
-  config.vm.synced_folder git_dir=ENV['SHARED_CODE'] || ENV['HOME']+"work/git", "/home/vagrant/git"
+  config.vm.synced_folder git_dir=ENV['SHARED_CODE'] || ENV['HOME']+"/work/git", "/home/vagrant/git"
 end
